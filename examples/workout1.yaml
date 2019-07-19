@@ -1,0 +1,10 @@
+meta:
+        length: 0:30:00
+
+timetable:
+        - at: 0:00:00
+          say: Time to warm up
+        - at: 0:00:50
+          say: Ten seconds left. Make it count!
+        - at: 0:01:00
+          say: And we are done. Have quick rest but keep moving.
