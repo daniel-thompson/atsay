@@ -6,61 +6,77 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-import gtts
-import pydub
 import sys
 import yaml
 import os
 
+from gtts import gTTS as TTS
 from pathlib import Path
 from pydub import AudioSegment
 
-def parse_offset(t):
-	hms = t
-	ms = 0
+class AudioTimetable:
+	def __init__(self, fname):
+		self._fname = Path(fname)
+		self._cachedir = self._fname.parent / 'atsay-cache'
 
-	hms_ms = t.split('.', 1)
-	if len(hms_ms) == 2:
-		hms = hms_ms[0]
-		ms = int(hms_ms[1])
+		with open(self._fname) as f:
+			self._raw = yaml.safe_load(f)
+		self._parse()
+		self._render()
 
-	hms = hms.split(':', 2)
-	h = int(hms[-3]) if len(hms) >= 3 else 0
-	m = int(hms[-2]) if len(hms) >= 2 else 0
-	s = int(hms[-1])
+	def export(self, *args, **kwargs):
+		self._track.export(*args, **kwargs)
 
-	return h * 60 * 60 + m * 60 + s + ms / 1000
+	def _overlay(self, timetable):
+		for t in timetable:
+			speech = self._text_to_speech(t)
+			self._track = self._track.overlay(speech, position=t['at'] * 1000)
+
+	def _parse(self):
+		def parse_time(t):
+			hms = t
+			ms = 0
+
+			hms_ms = t.split('.', 1)
+			if len(hms_ms) == 2:
+				hms = hms_ms[0]
+				ms = int(hms_ms[1])
+
+			hms = hms.split(':', 2)
+			h = int(hms[-3]) if len(hms) >= 3 else 0
+			m = int(hms[-2]) if len(hms) >= 2 else 0
+			s = int(hms[-1])
+
+			return h * 60 * 60 + m * 60 + s + ms / 1000
+
+		self._meta = self._raw['meta']
+		self._timetable = self._raw['timetable']
+
+		self._meta['length'] = parse_time(self._meta['length'])
+
+		for t in self._timetable:
+			t['at'] = parse_time(t['at'])
+
+	def _render(self):
+		# Create a silent stereo track of the right duration
+		self._track = AudioSegment.silent(
+				duration=self._meta['length'] * 1000,
+				frame_rate=44100).set_channels(2)
+		self._overlay(self._timetable)
+
+	def _text_to_speech(self, t):
+		if not self._cachedir.exists():
+			os.mkdir(self._cachedir)
+
+		say = t['say']
+		print(f'> {say}')
+
+		cacheline = self._cachedir / f'{say}.mp3'
+		if not cacheline.exists():
+			TTS(say).save(cacheline)
+
+		return AudioSegment.from_mp3(cacheline)
 
 fname = Path(sys.argv[1])
-cachedir = fname.parent / 'atsay-cache'
-if not cachedir.exists():
-	os.mkdir(cachedir)
-
-with open(fname) as f:
-	d = yaml.safe_load(f)
-
-# Parse all the durations and time offsets to put them in seconds
-d['meta']['length'] = parse_offset(d['meta']['length'])
-for p in d['timetable']:
-	if 'at' in p:
-		p['at'] = parse_offset(p['at'])
-	
-# Create a silent stereo track of the right duration
-track = pydub.AudioSegment.silent(duration=d['meta']['length'] * 1000, frame_rate=44100)
-track = track.set_channels(2)
-
-for p in d['timetable']:
-	print(f"> {p['say']}")
-	
-	cacheline = cachedir / f"{p['say']}.mp3"
-	if not cacheline.exists():
-		speech = gtts.gTTS(p['say'])	
-		speech.save(cacheline)
-
-	speech = pydub.AudioSegment.from_mp3(cacheline)
-
-	track = track.overlay(speech, position=p['at'] * 1000)
-
-# Export it in Ogg Vorbis format
-track.export(fname.stem + ".wav", format="wav")
-
+atsay = AudioTimetable(fname)
+atsay.export(fname.stem + '.wav', format='wav')
