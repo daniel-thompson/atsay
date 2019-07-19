@@ -14,6 +14,14 @@ from gtts import gTTS as TTS
 from pathlib import Path
 from pydub import AudioSegment
 
+# It it's installed we'd rather use IPython for interaction...
+try:
+	import IPython
+	interact = IPython.embed
+except:
+	import pdb
+	interact = pdb.set_trace
+
 class AudioTimetable:
 	def __init__(self, fname):
 		self._fname = Path(fname)
@@ -27,10 +35,35 @@ class AudioTimetable:
 	def export(self, *args, **kwargs):
 		self._track.export(*args, **kwargs)
 
-	def _overlay(self, timetable):
+	def _overlay(self, timetable, position=0):
+		def as_time(t):
+			ms = t % 1000
+			t //= 1000
+			s = t % 60
+			t //= 60
+			m = t % 60
+			h = t // 60
+
+			return f'{h}:{m:02}:{s:02}.{ms:03}'
+
 		for t in timetable:
-			speech = self._text_to_speech(t)
-			self._track = self._track.overlay(speech, position=t['at'] * 1000)
+			if 'at' not in t:
+				continue;
+			at = position + t['at']
+
+			if 'say' in t:
+				say = t['say']
+				print(f'[{as_time(at)}]  {say}')
+
+				speech = self._text_to_speech(say)
+				self._track = self._track.overlay(
+						speech,
+						position=at,
+						gain_during_overlay=-12)
+
+			if 'macro' in t:
+				id = t['macro']
+				self._overlay(self._macros[id], at)
 
 	def _parse(self):
 		def parse_time(t):
@@ -47,9 +80,17 @@ class AudioTimetable:
 			m = int(hms[-2]) if len(hms) >= 2 else 0
 			s = int(hms[-1])
 
-			return h * 60 * 60 + m * 60 + s + ms / 1000
+			m += h * 60
+			s += m * 60
+			ms += s * 1000
+
+			return ms
 
 		self._meta = self._raw['meta']
+		if 'macros' in self._raw:
+			self._macros = self._raw['macros']
+		else:
+			self._macros = {}
 		self._timetable = self._raw['timetable']
 
 		self._meta['length'] = parse_time(self._meta['length'])
@@ -57,19 +98,20 @@ class AudioTimetable:
 		for t in self._timetable:
 			t['at'] = parse_time(t['at'])
 
+		for macro in self._macros.values():
+			for t in macro:
+				t['at'] = parse_time(t['at'])
+
 	def _render(self):
 		# Create a silent stereo track of the right duration
 		self._track = AudioSegment.silent(
-				duration=self._meta['length'] * 1000,
+				duration=self._meta['length'],
 				frame_rate=44100).set_channels(2)
 		self._overlay(self._timetable)
 
-	def _text_to_speech(self, t):
+	def _text_to_speech(self, say):
 		if not self._cachedir.exists():
 			os.mkdir(self._cachedir)
-
-		say = t['say']
-		print(f'> {say}')
 
 		cacheline = self._cachedir / f'{say}.mp3'
 		if not cacheline.exists():
