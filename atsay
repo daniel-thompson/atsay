@@ -97,6 +97,10 @@ class AudioTimetable:
 						gain_during_overlay=-12)
 				self._at += len(audio)
 
+				if self._at > len(self._track):
+					self._track = self._track.fade_out(
+							duration=5000)
+
 			if 'macro' in t:
 				id = t['macro']
 				self._overlay(self._macros[id], self._at)
