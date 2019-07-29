@@ -98,6 +98,22 @@ class AudioTimetable:
 				id = t['macro']
 				self._overlay(self._macros[id], self._at)
 
+	def _include(self, fname):
+		'''Parses meta/include and macros'''
+		if fname:
+			print(f'>>>            INCLUDING {fname}')
+			with open(str(self._fname.parent / fname)) as f:
+				y = yaml.safe_load(f)
+		else:
+			y = self._raw
+
+		if 'meta' in y and 'include' in y['meta']:
+			for i in y['meta']['include']:
+				self._include(i)
+
+		if 'macros' in y:
+			for k, v in y['macros'].items():
+				self._macros[k] = v
 
 	def _parse(self):
 		def parse_time(t):
@@ -124,28 +140,10 @@ class AudioTimetable:
 			self._raw = yaml.safe_load(f)
 
 		self._meta = self._raw['meta']
-		if 'macros' in self._raw:
-			self._macros = self._raw['macros']
-		else:
-			self._macros = {}
 		self._timetable = self._raw['timetable']
 
-		# Macro in the macros from the included files. When there are
-		# macros of the same name then later macros will overwrite
-		# the previous ones.
-		imacros = {}
-		if 'include' in self._meta:
-			for i in self._meta['include']:
-				print(f'>>>            INCLUDING {i}')
-				with open(str(self._fname.parent / i)) as f:
-					include = yaml.safe_load(f)
-					for k, v in include['macros'].items():
-						imacros[k] = v
-
-		# Only merge keys that do not already exist
-		for k, v in imacros.items():
-			if k not in self._macros:
-				self._macros[k] = v
+		self._macros = {}
+		self._include(None)
 
 		self._meta['length'] = parse_time(self._meta['length'])
 
