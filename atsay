@@ -47,23 +47,35 @@ class AudioTimetable:
 			return f'{h}:{m:02}:{s:02}.{ms:03}'
 
 		for t in timetable:
-			if 'at' not in t:
-				continue;
-			at = position + t['at']
+			if 'at' in t:
+				self._at = position + t['at']
 
 			if 'say' in t:
 				say = t['say']
-				print(f'[{as_time(at)}]  {say}')
+				print(f'[{as_time(self._at)}]  {say}')
 
 				speech = self._text_to_speech(say)
 				self._track = self._track.overlay(
 						speech,
-						position=at,
+						position=self._at,
 						gain_during_overlay=-12)
+				self._at += len(speech)
+
+			if 'play' in t:
+				play = t['play']
+				print(f'[{as_time(self._at)}]  PLAYING {play}')
+
+				audio = AudioSegment.from_file(play)
+				self._track = overlay(
+						audio,
+						position=self._at,
+						gain_during_overlay=-12)
+				self._at += len(audio)
 
 			if 'macro' in t:
 				id = t['macro']
-				self._overlay(self._macros[id], at)
+				self._overlay(self._macros[id], self._at)
+
 
 	def _parse(self):
 		def parse_time(t):
@@ -96,17 +108,21 @@ class AudioTimetable:
 		self._meta['length'] = parse_time(self._meta['length'])
 
 		for t in self._timetable:
-			t['at'] = parse_time(t['at'])
+			if 'at' in t:
+				t['at'] = parse_time(t['at'])
 
 		for macro in self._macros.values():
 			for t in macro:
 				t['at'] = parse_time(t['at'])
 
 	def _render(self):
+		self._at = 0
+
 		# Create a silent stereo track of the right duration
 		self._track = AudioSegment.silent(
 				duration=self._meta['length'],
 				frame_rate=44100).set_channels(2)
+
 		self._overlay(self._timetable)
 
 	def _text_to_speech(self, say):
