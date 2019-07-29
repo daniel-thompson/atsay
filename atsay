@@ -84,8 +84,11 @@ class AudioTimetable:
 				self._at += len(speech)
 
 			if 'play' in t:
-				play = t['play']
+				play = Path(t['play'])
 				print(f'[{as_time(self._at)}]  PLAYING {play}')
+
+				if not play.exists() and not play.is_absolute():
+					play = self._fname.parent / play
 
 				audio = AudioSegment.from_file(play)
 				self._track = overlay(
