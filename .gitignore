@@ -1,3 +1,7 @@
 .*.swp
+*.ogg
 *.wav
 examples/atsay-cache/
+dkk/
+include/
+TODO.md
