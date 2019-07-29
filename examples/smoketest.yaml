@@ -1,0 +1,14 @@
+meta:
+        length: 0:01:30
+        include:
+                - indirect.yaml
+
+timetable:
+        - at: 0:00:00
+        - play: ../music/JeffSpeed68_-_Traveling_Lights.mp3
+
+        - at: 0:00:00
+        - say: Round 1. Single and double jabs.
+        - say: Keep working your feet and get the distance right.
+        - macro: one minute
+        - say: Have a quick rest but be sure to keep moving.

@@ -1,0 +1,48 @@
+macros:
+        done:
+                - at: 0:00:00
+                  say: And we are done.
+
+        ten seconds:
+                - at: 0:00:00
+                  say: Ten seconds
+                - at: 0:00:05
+                  say: Five
+                - at: 0:00:06
+                  say: Four
+                - at: 0:00:07
+                  say: Three
+                - at: 0:00:08
+                  say: Two
+                - at: 0:00:09
+                  say: One
+                - at: 0:00:10
+                  macro: done
+
+        thirty seconds:
+                - at: 0:00:10
+                  say: Twenty seconds left
+                - at: 0:00:20
+                  macro: ten seconds
+
+        one minute:
+                - at: 0:00:00
+                  say: Only one minute left.
+                - at: 0:00:30
+                  say: Thirty seconds left. Make it count!
+                - at: 0:00:50
+                  macro: ten seconds
+
+        two minutes:
+                - at: 0:01:00
+                  macro: one minute
+
+        two minutes thirty:
+                - at: 0:00:30
+                  say: Two minutes left on the clock.
+                  macro: two minutes
+
+        three minutes:
+                - at: 0:01:00
+                  say: That's one minute done.
+                  macro: two minutes
