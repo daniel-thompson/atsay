@@ -46,6 +46,30 @@ class AudioTimetable:
 
 			return f'{h}:{m:02}:{s:02}.{ms:03}'
 
+		def overlay(segment, position, gain_during_overlay):
+			middle_start = position
+			middle_end = position + len(segment)
+			duration = 500
+
+			beginning = self._track[:middle_start]
+			middle = self._track[middle_start:middle_end]
+			end = self._track[middle_end:]
+
+			beginning = beginning.fade(
+					to_gain=gain_during_overlay,
+					duration=duration,
+					end=float('inf'))
+			middle = middle.overlay(
+					segment,
+					position=0,
+					gain_during_overlay=gain_during_overlay)
+			end = end.fade(
+					from_gain=gain_during_overlay,
+					duration=duration,
+					start=0)
+
+			return beginning + middle + end
+
 		for t in timetable:
 			if 'at' in t:
 				self._at = position + t['at']
@@ -55,7 +79,7 @@ class AudioTimetable:
 				print(f'[{as_time(self._at)}]  {say}')
 
 				speech = self._text_to_speech(say)
-				self._track = self._track.overlay(
+				self._track = overlay(
 						speech,
 						position=self._at,
 						gain_during_overlay=-12)
