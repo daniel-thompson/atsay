@@ -2,6 +2,7 @@ meta:
         length: 0:01:30
         include:
                 - indirect.yaml
+                - karate.yaml
 
 timetable:
         - at: 0:00:00
@@ -12,3 +13,7 @@ timetable:
         - say: Keep working your feet and get the distance right.
         - macro: one minute
         - say: Have a quick rest but be sure to keep moving.
+
+        - at: 0:00:15
+        - say: Out of sequence multi-language test follows.
+        - macro: jodan tsuki

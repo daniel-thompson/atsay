@@ -1,0 +1,101 @@
+meta:
+        lang: ja
+
+macros:
+        heiko dachi:
+                - say: Heiko Dachi.
+                - say: Heiko Dachi.
+                - say: Feet parallel and apart.
+                  lang: en
+                - say: Heiko Dachi.
+
+        sanchin dachi:
+                - say: Sanchin Dachi.
+                - say: Sanchin Dachi.
+                - say: Hourglass or pigeon toe stance.
+                  lang: en
+                - say: Sanchin Dachi.
+
+        shiko dachi:
+                - say: Shiko Dachi.
+                - say: Shiko Dachi.
+                - say: Box or sumo stance.
+                  lang: en
+                - say: Shiko Dachi.
+
+        zenkutsu dachi:
+                - say: Zenkutsu Dachi.
+                - say: Zenkutsu Dachi.
+                - say: Front stance.
+                  lang: en
+                - say: Zenkutsu Dachi.
+
+        chudan tsuki:
+                - say: Chudan Tsuki.
+                - say: Chudan Tsuki.
+                - say: Straight punch to the body.
+                  lang: en
+                - say: Chudan Tsuki.
+
+        gedan tsuki:
+                - say: Jodan Tsuki.
+                - say: Jodan Tsuki.
+                - say: Straight punch to the groin.
+                - say: Jodan Tsuki.
+
+        jodan tsuki:
+                - say: Jodan Tsuki.
+                - say: Jodan Tsuki.
+                - say: Straight punch to the head.
+                  lang: en
+                - say: Jodan Tsuki.
+
+        gedan uraken uchi:
+                - say: Gedan Uraken Uchi.
+                - say: Gedan Uraken Uchi.
+                - say: Low Backfist Strike.
+                  lang: en
+                - say: Gedan Uraken Uchi.
+
+        hiza uchi:
+                - say: Hiza Uchi.
+                - say: Hiza Uchi.
+                - say: Knee Strike.
+                  lang: en
+                - say: Hiza Uchi.
+
+        mae uraken shomen uchi:
+                - say: Mae Uraken Shomen Uchi.
+                - say: Mae Uraken Shomen Uchi.
+                - say: Straight backfist to the head.
+                  lang: en
+                - say: Mae Uraken Shomen Uchi.
+
+        yoko uraken uchi:
+                - say: Yoko Uraken Uchi.
+                - say: Yoko Uraken Uchi.
+                - say: Side Backfist Strike.
+                  lang: en
+                - say: Yoko Uraken Uchi.
+                
+        chudan uke:
+                - say: Chudan Uke.
+                - say: Chudan Uke.
+                - say: Middle block.
+                  lang: en
+                - say: Chudan Uke.
+
+        gedan barai: # uke
+                - say: Gedan Barai.
+                - say: Gedan Barai.
+                - say: Lower block.
+                  lang: en
+                - say: Gedan Barai.
+
+        jodan uke:
+                - say: Jodan Uke.
+                - say: Jodan Uke.
+                - say: Upper block.
+                  lang: en
+                - say: Jodan Uke.
+

@@ -69,14 +69,25 @@ class AudioTimetable:
 			return beginning + middle + end
 
 		for t in timetable:
+			pause = 0
+
 			if 'at' in t:
 				self._at = position + t['at']
 
 			if 'say' in t:
 				say = t['say']
+				lang = t['lang']
 				print(f'[{as_time(self._at)}]  {say}')
 
-				speech = self._text_to_speech(say)
+				# Automatically take a bigger pause if a
+				# saying ends with these characters
+				if say[-1] in '.?!':
+					pause = 500
+
+				# Strip trailing . to improve cache hit rate
+				say = say.rstrip('.')
+
+				speech = self._text_to_speech(say, lang)
 				self._track = overlay(
 						speech,
 						position=self._at,
@@ -101,12 +112,17 @@ class AudioTimetable:
 					self._track = self._track.fade_out(
 							duration=5000)
 
+			if 'pause' in t:
+				pause = int(t['pause'])
+
 			if 'macro' in t:
 				id = t['macro']
 				self._overlay(self._macros[id], self._at)
 
+			self._at += pause
+
 	def _include(self, fname):
-		'''Parses meta/include and macros'''
+		'''Parses meta/include, meta/lang and macros'''
 		if fname:
 			print(f'>>>            INCLUDING {fname}')
 			with open(str(self._fname.parent / fname)) as f:
@@ -118,8 +134,21 @@ class AudioTimetable:
 			for i in y['meta']['include']:
 				self._include(i)
 
+		if 'meta' in y and 'lang' in y['meta']:
+			lang = y['meta']['lang']
+		else:
+			lang = 'en'
+
+		if 'timetable' in y:
+			for t in y['timetable']:
+				if 'lang' not in t:
+					t['lang'] = lang
+
 		if 'macros' in y:
 			for k, v in y['macros'].items():
+				for t in v:
+					if 'lang' not in t:
+						t['lang'] = lang
 				self._macros[k] = v
 
 	def _parse(self):
@@ -172,13 +201,13 @@ class AudioTimetable:
 
 		self._overlay(self._timetable)
 
-	def _text_to_speech(self, say):
+	def _text_to_speech(self, say, lang='en'):
 		if not self._cachedir.exists():
 			os.mkdir(self._cachedir)
 
-		cacheline = self._cachedir / f'{say}.mp3'
+		cacheline = self._cachedir / f'{say}-{lang}.mp3'
 		if not cacheline.exists():
-			TTS(say).save(cacheline)
+			TTS(say, lang=lang).save(cacheline)
 
 		return AudioSegment.from_mp3(str(cacheline))
 
