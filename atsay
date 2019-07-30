@@ -189,7 +189,8 @@ class AudioTimetable:
 
 		for macro in self._macros.values():
 			for t in macro:
-				t['at'] = parse_time(t['at'])
+				if 'at' in t:
+					t['at'] = parse_time(t['at'])
 
 	def _render(self):
 		self._at = 0
