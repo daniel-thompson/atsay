@@ -28,101 +28,114 @@ class AudioTimetable:
 		self._cachedir = self._fname.parent / 'atsay-cache'
 
 		self._parse()
-		self._render()
 
 	def export(self, *args, **kwargs):
 		self._track.export(*args, **kwargs)
 
-	def _overlay(self, timetable, position=0):
-		def as_time(t):
-			ms = t % 1000
-			t //= 1000
-			s = t % 60
-			t //= 60
-			m = t % 60
-			h = t // 60
+	@staticmethod
+	def _as_time(t):
+		ms = t % 1000
+		t //= 1000
+		s = t % 60
+		t //= 60
+		m = t % 60
+		h = t // 60
 
-			return f'{h}:{m:02}:{s:02}.{ms:03}'
+		return f'{h}:{m:02}:{s:02}.{ms:03}'
 
-		def overlay(segment, position, gain_during_overlay):
-			middle_start = position
-			middle_end = position + len(segment)
-			duration = 500
+	def _overlay(self, segment, position, gain_during_overlay):
+		'''Overlay segment on the current track (with soft-mute)'''
+		middle_start = position
+		middle_end = position + len(segment)
+		duration = 500
 
-			beginning = self._track[:middle_start]
-			middle = self._track[middle_start:middle_end]
-			end = self._track[middle_end:]
+		beginning = self._track[:middle_start]
+		middle = self._track[middle_start:middle_end]
+		end = self._track[middle_end:]
 
-			beginning = beginning.fade(
-					to_gain=gain_during_overlay,
-					duration=duration,
-					end=float('inf'))
-			middle = middle.overlay(
-					segment,
-					position=0,
-					gain_during_overlay=gain_during_overlay)
-			end = end.fade(
-					from_gain=gain_during_overlay,
-					duration=duration,
-					start=0)
+		beginning = beginning.fade(
+				to_gain=gain_during_overlay,
+				duration=duration,
+				end=float('inf'))
+		middle = middle.overlay(
+				segment,
+				position=0,
+				gain_during_overlay=gain_during_overlay)
+		end = end.fade(
+				from_gain=gain_during_overlay,
+				duration=duration,
+				start=0)
 
-			return beginning + middle + end
+		return beginning + middle + end
 
+	def _say(self, say, lang):
+		print(f'[{self._as_time(self._at)}]  {say}')
+
+		# Automatically take a bigger pause if a
+		# saying ends with these characters
+		if say[-1] in '.?!':
+			self._pause = 500
+
+		# Strip trailing . to improve cache hit rate
+		say = say.rstrip('.')
+
+		speech = self._text_to_speech(say, lang)
+		self._track = self._overlay(
+				speech,
+				position=self._at,
+				gain_during_overlay=-12)
+
+		self._at += len(speech)
+
+	def _play(self, fname):
+		play = Path(fname)
+		print(f'[{self._as_time(self._at)}]  PLAYING {play}')
+
+		if not play.exists() and not play.is_absolute():
+			play = self._fname.parent / play
+
+		audio = AudioSegment.from_file(play)
+		self._track = self._overlay(
+				audio,
+				position=self._at,
+				gain_during_overlay=-12)
+		self._at += len(audio)
+
+		if self._at > len(self._track):
+			self._track = self._track.fade_out(duration=5000)
+
+	def _render(self, timetable, position=0):
 		for t in timetable:
-			pause = 0
+			self._pause = 0
 
 			if 'at' in t:
 				self._at = position + t['at']
 
 			if 'say' in t:
-				say = t['say']
-				lang = t['lang']
-				print(f'[{as_time(self._at)}]  {say}')
+				self._say(t['say'], t['lang'])
 
-				# Automatically take a bigger pause if a
-				# saying ends with these characters
-				if say[-1] in '.?!':
-					pause = 500
-
-				# Strip trailing . to improve cache hit rate
-				say = say.rstrip('.')
-
-				speech = self._text_to_speech(say, lang)
-				self._track = overlay(
-						speech,
-						position=self._at,
-						gain_during_overlay=-12)
-				self._at += len(speech)
+			if 'translate' in t:
+				self._at += 500
+				self._say(t['say'], t['lang'])
+				self._at += 500
+				self._say(t['translate'], t['to'])
+				self._at += 500
+				self._say(t['say'], t['lang'])
 
 			if 'play' in t:
-				play = Path(t['play'])
-				print(f'[{as_time(self._at)}]  PLAYING {play}')
-
-				if not play.exists() and not play.is_absolute():
-					play = self._fname.parent / play
-
-				audio = AudioSegment.from_file(play)
-				self._track = overlay(
-						audio,
-						position=self._at,
-						gain_during_overlay=-12)
-				self._at += len(audio)
-
-				if self._at > len(self._track):
-					self._track = self._track.fade_out(
-							duration=5000)
+				self._play(t['play'])
 
 			if 'pause' in t:
-				pause = int(t['pause'])
+				self._pause = int(t['pause'])
 
 			if 'macro' in t:
 				id = t['macro']
-				self._overlay(self._macros[id], self._at)
+				self._render(self._macros[id], self._at)
 
-			self._at += pause
+			self._at += self._pause
 
 	def _include(self, fname):
-		'''Parses meta/include, meta/lang and macros'''
+		'''Parses meta/include, meta/lang, meta/translate and macros'''
 		if fname:
 			print(f'>>>            INCLUDING {fname}')
 			with open(str(self._fname.parent / fname)) as f:
@@ -139,16 +152,25 @@ class AudioTimetable:
 		else:
 			lang = 'en'
 
+		if 'meta' in y and 'lang' in y['meta']:
+			translate = y['meta']['translate']
+		else:
+			lang = 'en'
+
+		def add_inherited_tags(t):
+			if 'say' in t and 'lang' not in t:
+				t['lang'] = lang
+			if 'translate' in t and 'to' not in t:
+				t['to'] = translate
+
 		if 'timetable' in y:
 			for t in y['timetable']:
-				if 'lang' not in t:
-					t['lang'] = lang
+				add_inherited_tags(t)
 
 		if 'macros' in y:
 			for k, v in y['macros'].items():
 				for t in v:
-					if 'lang' not in t:
-						t['lang'] = lang
+					add_inherited_tags(t)
 				self._macros[k] = v
 
 	def _parse(self):
@@ -192,7 +214,6 @@ class AudioTimetable:
 				if 'at' in t:
 					t['at'] = parse_time(t['at'])
 
-	def _render(self):
 		self._at = 0
 
 		# Create a silent stereo track of the right duration
@@ -200,7 +221,7 @@ class AudioTimetable:
 				duration=self._meta['length'],
 				frame_rate=44100).set_channels(2)
 
-		self._overlay(self._timetable)
+		self._render(self._timetable)
 
 	def _text_to_speech(self, say, lang='en'):
 		if not self._cachedir.exists():
