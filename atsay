@@ -214,14 +214,18 @@ class AudioTimetable:
 
 		self._meta['length'] = parse_time(self._meta['length'])
 
-		for t in self._timetable:
+		def force_types(t):
 			if 'at' in t:
 				t['at'] = parse_time(t['at'])
+			if 'say' in t:
+				t['say'] = str(t['say'])
+
+		for t in self._timetable:
+			force_types(t)
 
 		for macro in self._macros.values():
 			for t in macro:
-				if 'at' in t:
-					t['at'] = parse_time(t['at'])
+				force_types(t)
 
 		self._at = 0
 
