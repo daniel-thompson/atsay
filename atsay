@@ -112,6 +112,13 @@ class AudioTimetable:
 			if 'at' in t:
 				self._at = position + int(t['at'] / speed)
 
+			if 'repeat' in t:
+				newt = dict(t)
+				newt.pop('repeat')
+				newt.pop('at', None)
+				for i in range(t['repeat']):
+					self._render([ newt ], self._at)
+
 			if 'say' in t:
 				self._say(t['say'], t['lang'])
 
