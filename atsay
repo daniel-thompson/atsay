@@ -144,6 +144,8 @@ class AudioTimetable:
 
 			self._at += self._pause
 
+		self._pause = 0
+
 	def _include(self, fname):
 		'''Parses meta/include, meta/lang, meta/translate and macros'''
 		if fname:
