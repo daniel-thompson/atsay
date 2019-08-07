@@ -4,19 +4,30 @@ meta:
                 - indirect.yaml
                 - karate.yaml
 
+macros:
+        local macro:
+                - say: This is a local macro
+
 timetable:
         - at: 0:00:00
+          macro: karate count
+
+        - at: 0:00:10
         - play: ../music/JeffSpeed68_-_Traveling_Lights.mp3
 
-        - at: 0:00:00
+        - at: 0:00:10
+        - macro: local macro
         - say: Round 1. Single and double jabs.
         - say: Keep working your feet and get the distance right.
         - macro: one minute
         - say: Have a quick rest but be sure to keep moving.
 
-        - at: 0:00:15
+        - at: 0:00:25
         - say: Out of sequence multi-language test follows.
         - macro: jodan tsuki
 
-        - at: 0:00:45
-          macro: count
+        - at: 0:00:55
+          random:
+                  - jodan uke
+                  - chudan uke
+                  - gedan barai
