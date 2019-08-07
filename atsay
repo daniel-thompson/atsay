@@ -161,10 +161,10 @@ class AudioTimetable:
 		else:
 			lang = 'en'
 
-		if 'meta' in y and 'lang' in y['meta']:
+		if 'meta' in y and 'translate' in y['meta']:
 			translate = y['meta']['translate']
 		else:
-			lang = 'en'
+			translate = 'en'
 
 		def add_inherited_tags(t):
 			if 'say' in t and 'lang' not in t:
