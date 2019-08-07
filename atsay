@@ -105,12 +105,12 @@ class AudioTimetable:
 		if self._at > len(self._track):
 			self._track = self._track.fade_out(duration=5000)
 
-	def _render(self, timetable, position=0):
+	def _render(self, timetable, position=0, speed=1):
 		for t in timetable:
 			self._pause = 0
 
 			if 'at' in t:
-				self._at = position + t['at']
+				self._at = position + int(t['at'] / speed)
 
 			if 'say' in t:
 				self._say(t['say'], t['lang'])
@@ -131,7 +131,8 @@ class AudioTimetable:
 
 			if 'macro' in t:
 				id = t['macro']
-				self._render(self._macros[id], self._at)
+				newspeed = t['speed'] if 'speed' in t else 1
+				self._render(self._macros[id], self._at, newspeed * speed)
 
 			if 'random' in t:
 				if 'shuffle' not in t or not len(t['shuffle']):
