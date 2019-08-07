@@ -6,6 +6,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
+import random
 import sys
 import yaml
 import os
@@ -132,6 +133,14 @@ class AudioTimetable:
 				id = t['macro']
 				self._render(self._macros[id], self._at)
 
+			if 'random' in t:
+				if 'shuffle' not in t or not len(t['shuffle']):
+					t['shuffle'] = list(t['random'])
+					random.shuffle(t['shuffle'])
+				id = t['shuffle'].pop()
+				newspeed = t['speed'] if 'speed' in t else 1
+				self._render(self._macros[id], self._at, newspeed * speed)
+
 			self._at += self._pause
 
 	def _include(self, fname):
@@ -233,6 +242,7 @@ class AudioTimetable:
 
 		return AudioSegment.from_mp3(str(cacheline))
 
+random.seed()
 fname = Path(sys.argv[1])
 atsay = AudioTimetable(fname)
 atsay.export(fname.stem + '.wav', format='wav')
