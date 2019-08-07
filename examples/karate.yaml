@@ -3,27 +3,40 @@ meta:
         translate: en
 
 macros:
-        count:
+        karate count:
                 - at: 0:00:00
-                - say: Ichi
+                  say: 1
                 - at: 0:00:01
-                - say: Ni
+                  say: 2
                 - at: 0:00:02
-                - say: San
+                  say: 3
                 - at: 0:00:03
-                - say: Shi
+                  #say: 4
+                  say: she
                 - at: 0:00:04
-                - say: Go
+                  say: 5
                 - at: 0:00:05
-                - say: Roku
+                  say: 6
                 - at: 0:00:06
-                - say: Shichi
+                  #say: 7
+                  say: shichi
                 - at: 0:00:07
-                - say: Hachi
+                  say: 8
                 - at: 0:00:08
-                - say: Kyu
+                  say: 9
                 - at: 0:00:09
-                - say: Jyu
+                  say: 10
+
+        welcome:
+                - at: 0:00:00
+                  say: Shugo.
+                  translate: Line up.
+                - at: 0:00:10
+                  say: Kio Tsuki
+                - at: 0:00:15
+                  say: Rei
+                - at: 0:00:20
+                  say: Yasume
 
         heiko dachi:
                 - say: Heiko Dachi.
