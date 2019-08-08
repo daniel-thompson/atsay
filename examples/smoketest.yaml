@@ -31,3 +31,4 @@ timetable:
                   - jodan uke
                   - chudan uke
                   - gedan barai
+          repeat: 2

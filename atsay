@@ -118,6 +118,7 @@ class AudioTimetable:
 				newt.pop('at', None)
 				for i in range(t['repeat']):
 					self._render([ newt ], self._at)
+				continue
 
 			if 'say' in t:
 				self._say(t['say'], t['lang'])
