@@ -7,6 +7,7 @@
 #
 
 import random
+import re
 import sys
 import yaml
 import os
@@ -24,13 +25,15 @@ except:
 	interact = pdb.set_trace
 
 class AudioTimetable:
+	TEMPLATE = re.compile('[{]([a-zA-Z0-9_]+)[}]')
+
 	def __init__(self, fname):
 		self._fname = Path(fname)
 		self._cachedir = self._fname.parent / 'atsay-cache'
 
-		self._parse()
 
 	def export(self, *args, **kwargs):
+		self._parse()
 		self._track.export(*args, **kwargs)
 
 	@staticmethod
@@ -70,6 +73,26 @@ class AudioTimetable:
 		return beginning + middle + end
 
 	def _say(self, say, lang):
+		# Handle {template} substitutions. Substitutions occur
+		# at the very last moment before the text is rendered.
+		t = self.TEMPLATE.search(say)
+		while t:
+			full_token = t.group(0)
+			token = t.group(1)
+			next_token = 'next-' + token
+
+			# Treat any unexpected substitution as a counter
+			# that counts upwards from 1
+			if token not in self._meta:
+				self._meta[token] = 1
+				self._meta[next_token] = 1
+
+			say = say.replace(full_token, str(self._meta[token]), 1)
+			if next_token in self._meta:
+				self._meta[token] += self._meta[next_token]
+
+			t = self.TEMPLATE.search(say)
+
 		print(f'[{self._as_time(self._at)}]  {say}')
 
 		# Automatically take a bigger pause if a

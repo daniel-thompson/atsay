@@ -3,6 +3,10 @@ meta:
         include:
                 - indirect.yaml
                 - karate.yaml
+        many: 2
+        lots: 4
+        next-lots: 4
+
 
 macros:
         local macro:
@@ -17,8 +21,11 @@ timetable:
 
         - at: 0:00:10
         - macro: local macro
-        - say: Round 1. Single and double jabs.
-        - say: Keep working your feet and get the distance right.
+        - say: Round {round}. This is a test, not a round.
+        - say: Round {round}. Single and double jabs.
+        - say: Move {many} feet.
+        - say: Still got {many} feet?
+        - say: One, two, many, {lots}, more {lots}
         - macro: one minute
         - say: Have a quick rest but be sure to keep moving.
 
