@@ -253,6 +253,11 @@ class AudioTimetable:
 
 	def _parse(self):
 		def parse_time(t):
+			# YAML library means that h:mm:ss comes to us as
+			# a string but h:mm:ss.ms comes to us a float!
+			if isinstance(t, float):
+				return int(t * 1000)
+
 			hms = t
 			ms = 0
 
