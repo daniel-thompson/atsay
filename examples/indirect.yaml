@@ -1,3 +1,9 @@
+#
+# indirect.yaml
+#
+# Test indirect includes.
+#
+
 meta:
         include:
                 - time.yaml

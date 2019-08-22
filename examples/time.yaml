@@ -1,3 +1,9 @@
+#
+# time.yaml
+#
+# Count down timers to keep us motivated as we get tired.
+#
+
 macros:
         done:
                 - at: 0:00:00

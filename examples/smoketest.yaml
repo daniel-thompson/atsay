@@ -1,3 +1,10 @@
+#
+# smoketest.yaml
+#
+# Quick test that tried to exercise as many features as possible in the
+# least space.
+#
+
 meta:
         length: 0:01:30
         include:
@@ -7,10 +14,21 @@ meta:
         lots: 4
         next-lots: 4
 
-
 macros:
         local macro:
                 - say: This is a local macro
+        one:
+                - say: one
+        two:
+                - say: two
+        three:
+                - say: three
+        four:
+                - say: four
+        choose:
+                - random:
+                        - one
+                        - two
 
 timetable:
         - at: 0:00:00
@@ -23,15 +41,12 @@ timetable:
         - macro: local macro
         - say: Round {round}. This is a test, not a round.
         - say: Round {round}. Single and double jabs.
-        - say: Move {many} feet.
-        - say: Still got {many} feet?
-        - say: One, two, many, {lots}, more {lots}
-        - macro: one minute
-        - say: Have a quick rest but be sure to keep moving.
+        - say: One, two, {many}, {many}, {lots}, more {lots}
+        - macro: ten seconds
 
-        - at: 0:00:25
+        - at: 0:00:35
         - say: Out of sequence multi-language test follows.
-        - macro: jodan tsuki
+        - macro: mae geri
 
         - at: 0:00:55
           random:
@@ -39,3 +54,11 @@ timetable:
                   - chudan uke
                   - gedan barai
           repeat: 2
+          length: 0:00:07.5
+
+        - at: 0:01:25
+          random:
+                  - choose
+                  - three
+                  - four
+          repeat: 4

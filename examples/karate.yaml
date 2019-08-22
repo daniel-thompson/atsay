@@ -1,8 +1,17 @@
+#
+# karate.yaml
+#
+# Use some karate terminology to test the multi-language support.
+#
+
 meta:
         lang: ja
         translate: en
 
 macros:
+        # Mostly counting works better with numbers than with the Japanese
+        # phrases (in Roman alphabet). However for some we force specific
+        # alternatives... this is mostly just a personal preference.
         karate count:
                 - at: 0:00:00
                   say: 1
@@ -27,65 +36,10 @@ macros:
                 - at: 0:00:09
                   say: 10
 
-        welcome:
-                - at: 0:00:00
-                  say: Shugo.
-                  translate: Line up.
-                - at: 0:00:10
-                  say: Kio Tsuki
-                - at: 0:00:15
-                  say: Rei
-                - at: 0:00:20
-                  say: Yasume
-
-        heiko dachi:
-                - say: Heiko Dachi.
-                  translate: Feed parallel and apart.
-
-        sanchin dachi:
-                - say: Sanchin Dachi.
-                  translate: Hourglass or pigeon toe stance.
-
-        shiko dachi:
-                - say: Shiko Dachi.
-                  translate: Box or sumo stance.
-
-        zenkutsu dachi:
-                - say: Zenkutsu Dachi.
-                  translate: Front stance.
-
         mae geri:
                 - say: Mae Geri.
                   translate: Front kick.
 
-        chudan tsuki:
-                - say: Chudan Tsuki.
-                  translate: Straight punch to the body.
-
-        gedan tsuki:
-                - say: Jodan Tsuki.
-                  translate: Straight punch to the groin.
-
-        jodan tsuki:
-                - say: Jodan Tsuki.
-                  translate: Straight punch to the head.
-
-        gedan uraken uchi:
-                - say: Gedan Uraken Uchi.
-                  translate: Low Backfist Strike.
-
-        hiza uchi:
-                - say: Hiza Uchi.
-                  translate: Knee Strike.
-
-        mae uraken shomen uchi:
-                - say: Mae Uraken Shomen Uchi.
-                  translate: Straight backfist to the head.
-
-        yoko uraken uchi:
-                - say: Yoko Uraken Uchi.
-                  translate: Side Backfist Strike.
-                
         chudan uke:
                 - say: Chudan Uke.
                   translate: Middle block.
@@ -98,3 +52,4 @@ macros:
                 - say: Jodan Uke.
                   translate: Upper block.
 
+        # This is just an example... you probably need a lot more drills here!
