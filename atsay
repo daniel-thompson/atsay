@@ -139,6 +139,32 @@ class AudioTimetable:
 		if self._at > len(self._track):
 			self._track = self._track.fade_out(duration=5000)
 
+	def _random(self, t):
+		least_visited = max(self._counts.values())
+		for id in t['random']:
+			if id not in self._counts:
+				self._counts[id] = 0
+			if self._counts[id] < least_visited:
+				least_visited = self._counts[id]
+
+		candidates = [ id for id in t['random'] if
+				self._counts[id] <= least_visited ]
+		id = random.choice(candidates)
+
+		self._counts[id] += 1
+
+		# Update the parental counts (unless it has been inhibited)
+		parent = self._random_parent[-1]
+		if parent:
+			if len(candidates) > 1:
+				self._counts[parent] = least_visited
+			else:
+				self._counts[parent] = least_visited + 1
+		self._random_parent.append(id
+				if 'no-inherit' not in t else None)
+
+		return id
+
 	def _render(self, timetable, position=0, speed=1):
 		for t in timetable:
 			self._pause = 0
@@ -177,12 +203,10 @@ class AudioTimetable:
 				self._render(self._macros[id], self._at, newspeed * speed)
 
 			if 'random' in t:
-				if 'shuffle' not in t or not len(t['shuffle']):
-					t['shuffle'] = list(t['random'])
-					random.shuffle(t['shuffle'])
-				id = t['shuffle'].pop()
+				id = self._random(t)
 				newspeed = t['speed'] if 'speed' in t else 1
 				self._render(self._macros[id], self._at, newspeed * speed)
+				self._random_parent.pop()
 
 			self._at += self._pause
 
@@ -251,6 +275,9 @@ class AudioTimetable:
 		with open(str(self._fname)) as f:
 			self._raw = yaml.safe_load(f)
 
+		self._counts = { None : 0 }
+		self._random_parent = [ None ]
+
 		self._meta = self._raw['meta']
 		self._timetable = self._raw['timetable']
 
@@ -280,6 +307,8 @@ class AudioTimetable:
 				frame_rate=44100).set_channels(2)
 
 		self._render(self._timetable)
+
+		assert(1 == len(self._random_parent))
 
 	def _text_to_speech(self, say, lang='en'):
 		if self.dry_run:
