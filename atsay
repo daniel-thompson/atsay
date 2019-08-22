@@ -6,6 +6,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
+import argparse
 import random
 import re
 import sys
@@ -31,10 +32,13 @@ class AudioTimetable:
 		self._fname = Path(fname)
 		self._cachedir = self._fname.parent / 'atsay-cache'
 
+		self.fast = False
+		self.dry_run = False
 
 	def export(self, *args, **kwargs):
 		self._parse()
-		self._track.export(*args, **kwargs)
+		if not self.dry_run:
+			self._track.export(*args, **kwargs)
 
 	@staticmethod
 	def _as_time(t):
@@ -49,6 +53,9 @@ class AudioTimetable:
 
 	def _overlay(self, segment, position, gain_during_overlay):
 		'''Overlay segment on the current track (with soft-mute)'''
+		if self.dry_run:
+			return segment
+
 		middle_start = position
 		middle_end = position + len(segment)
 		duration = 500
@@ -57,18 +64,19 @@ class AudioTimetable:
 		middle = self._track[middle_start:middle_end]
 		end = self._track[middle_end:]
 
-		beginning = beginning.fade(
-				to_gain=gain_during_overlay,
-				duration=duration,
-				end=float('inf'))
 		middle = middle.overlay(
 				segment,
 				position=0,
 				gain_during_overlay=gain_during_overlay)
-		end = end.fade(
-				from_gain=gain_during_overlay,
-				duration=duration,
-				start=0)
+		if not self.fast:
+			beginning = beginning.fade(
+					to_gain=gain_during_overlay,
+					duration=duration,
+					end=float('inf'))
+			end = end.fade(
+					from_gain=gain_during_overlay,
+					duration=duration,
+					start=0)
 
 		return beginning + middle + end
 
@@ -114,6 +122,9 @@ class AudioTimetable:
 	def _play(self, fname):
 		play = Path(fname)
 		print(f'[{self._as_time(self._at)}]  PLAYING {play}')
+
+		if self.dry_run:
+			return
 
 		if not play.exists() and not play.is_absolute():
 			play = self._fname.parent / play
@@ -271,6 +282,10 @@ class AudioTimetable:
 		self._render(self._timetable)
 
 	def _text_to_speech(self, say, lang='en'):
+		if self.dry_run:
+			return AudioSegment.silent(
+					duration=1900,
+					frame_rate=44100).set_channels(2)
 		if not self._cachedir.exists():
 			os.mkdir(self._cachedir)
 
@@ -280,7 +295,23 @@ class AudioTimetable:
 
 		return AudioSegment.from_mp3(str(cacheline))
 
-random.seed()
-fname = Path(sys.argv[1])
-atsay = AudioTimetable(fname)
-atsay.export(fname.stem + '.wav', format='wav')
+def main():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('infile')
+	parser.add_argument('--dry-run', action='store_true',
+			help='fast syntax check')
+	parser.add_argument('--fast', action='store_true',
+			help='enable fast-mode (a.k.a. disable soft-muting)')
+	args = parser.parse_args()
+
+	infile = Path(args.infile)
+	outfile = infile.parent / (infile.stem + '.wav')
+
+	atsay = AudioTimetable(infile)
+	atsay.dry_run = args.dry_run
+	atsay.fast = args.fast
+
+	random.seed()
+	atsay.export(outfile, format='wav')
+
+main()
