@@ -172,6 +172,10 @@ class AudioTimetable:
 			if 'at' in t:
 				self._at = position + int(t['at'] / speed)
 
+			# Store the original at (in case we get a length
+			# command)
+			originally_at = self._at
+
 			if 'repeat' in t:
 				newt = dict(t)
 				newt.pop('repeat')
@@ -209,6 +213,10 @@ class AudioTimetable:
 				self._random_parent.pop()
 
 			self._at += self._pause
+
+			if 'length' in t:
+				self._at = originally_at + t['length']
+
 
 		self._pause = 0
 
@@ -294,6 +302,8 @@ class AudioTimetable:
 		def force_types(t):
 			if 'at' in t:
 				t['at'] = parse_time(t['at'])
+			if 'length' in t:
+				t['length'] = parse_time(t['length'])
 			if 'say' in t:
 				t['say'] = str(t['say'])
 
