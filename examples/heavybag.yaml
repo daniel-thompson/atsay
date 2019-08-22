@@ -1,0 +1,165 @@
+#
+# heavybag.yaml
+#
+# Example heavybag workout composed of 8 short rounds together with a
+# simple warm up and (too short) cool down and stretch.
+#
+
+meta:
+        length: 0:30:00
+
+        include:
+                - time.yaml
+                - jukebox.yaml
+
+macros:
+        # Simple five minute warm up
+        warm up:
+                - say: Time to warm up.
+                - say: Get the bag moving with a few kicks and get your footwork going.
+                - say: Move around and with the bag but don't throw anything with any power.
+                - at: 0:00:00
+                - macro: two minutes
+
+                - say: Finish the warm up with a few exercises.
+
+                - say: Press ups!
+                - at: 0:02:00
+                - macro: thirty seconds
+
+                - say: Burpees
+                - at: 0:02:30
+                - macro: thirty seconds
+
+                - say: Squats
+                - at: 0:03:00
+                - macro: thirty seconds
+
+                - say: Sit ups. Keep your back straight.
+                - at: 0:03:30
+                - macro: thirty seconds
+
+                - say: Alternating lunges
+                - at: 0:04:00
+                - macro: thirty seconds
+                - say: Have a quick rest but be sure to keep moving.
+
+        jab:
+                - say: Round {round}. Single and double jabs.
+                - say: Keep working your feet and get the distance right.
+                - macro: two minutes thirty
+                - say: Have a quick rest but be sure to keep moving.
+
+        cross:
+                - say: Round {round}. Follow up your jabs with a cross.
+                - say: Focus on technique and accuracy.
+                - macro: two minutes thirty
+                - say: Have a quick rest but be sure to keep moving.
+
+        jab cross:
+                - say: Round {round}. This round is in two parts and we'll focus on speed.
+                - say: Keep the technique clean but stay on that bag all the time.
+                - macro: one minute
+                - say: "but we'll be at the bag again very shortly"
+                - at: 0:01:30
+                - say: "Back on that bag. Don't let up."
+                - macro: one minute
+                - say: Have a quick rest but be sure to keep moving.
+
+        five shots:
+                - say: Round {round}. Five shots at a time. Work jab, cross and hook punches.
+                - macro: two minutes thirty
+                - say: Have a quick rest but be sure to keep moving.
+
+        freestyle:
+                - say: Round {round}. A free style round.
+                - say: Mix up your levels and move your hands fast, A to B, B to A. Kick to finish.
+                - macro: two minutes thirty
+                - say: Have a quick rest but be sure to keep moving.
+
+        freestyle hard:
+                - say: Round {round}. Free style.
+                - say: Throw any combination you like at the bag. Land everything at full power.
+                - macro: two minutes thirty
+
+        lead leg kicks:
+                - say: Round {round}. Lead leg kicks followed up with two or three punches.
+                - say: Focus on foot technique and distancing.
+                - macro: two minutes thirty
+                - say: Have a quick rest but be sure to keep moving.
+
+        kick fatigue drill:
+                - say: Round {round}. Another round in two parts.
+                - say: Let's start with left and right round house kicks.
+                - macro: one minute
+                - say: "but we'll be at the bag again very shortly"
+                - at: 0:01:30
+                - say: "Left, right, kick. Right, left, kick."
+                - macro: one minute
+                - say: Have a quick rest but be sure to keep moving.
+
+        front kick:
+                - say: Round {round}. Front kicks.
+                - say: Get your knee nice and high and ensure a good balanced retraction.
+                - macro: two minutes thirty
+                - say: Have a quick rest but be sure to keep moving.
+
+        roundhouse kick:
+                - say: Round {round}. Snapped side kick.
+                - say: Chamber, strike, chamber, down. Careful with the footwork.
+                - macro: two minutes thirty
+                - say: Have a quick rest but be sure to keep moving.
+
+        infinite combo:
+                - say: Round {round}
+                - say: Infinite combo of jab, cross, lead leg kick, cross, jab, rear leg kick.
+                - say: Keep your power right down and focus on getting the distance right and on a clean transition from kick to punch.
+                - macro: two minutes thirty
+                - say: Have a quick rest but be sure to keep moving.
+
+        pendulum combo:
+                - say: Round {round}. Pendulum combo.
+                - say: Lead leg kick and cross joined with pendulum steps.
+                - macro: two minutes thirty
+                - say: Have a quick rest but be sure to keep moving.
+
+timetable:
+        - at: 0:00:00
+        - macro: jukebox
+        - at: 0:00:00
+
+        - macro: warm up                #  0:00
+          length: 0:05:00
+
+        - random:                       #  5:00
+                - jab
+                - cross
+          length: 0:03:00
+
+        - random:                       #  8:00
+                - cross
+                - five shots
+          length: 0:03:00
+
+        - macro: jab cross              # 11:00
+          length: 0:03:00
+
+        - macro: freestyle              # 14:00
+          length: 0:03:00
+
+        - random:                       # 17:00
+                - lead leg kicks
+                - front kick
+                - roundhouse kick
+                - kick fatigue drill
+                - infinite combo
+                - pendulum combo
+          length: 0:03:00
+          repeat: 3
+
+        - macro: freestyle hard         # 26:00
+
+        - say: Time to cool down. Pay attention to stretching your shoulders.
+        - at: 0:28:50
+        - macro: one minute
+        - say: "That's it for today"

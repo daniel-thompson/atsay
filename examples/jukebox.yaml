@@ -1,0 +1,27 @@
+#
+# jukebox.yaml
+#
+# Example of a background music file. To keep the download size small this
+# jukebox only contains two tracks, with the expectation that users enrich the
+# jukebox with tracks of their own. Naturally in order to support 30 minute
+# workouts the jukebox needs priming with far more than just two tunes.
+#
+
+macros:
+        traveling_lights:
+                - play: ../music/JeffSpeed68_-_Traveling_Lights.mp3
+
+        secret_things:
+                - play: ../music/snowflake_-_Secret_Things.mp3
+
+        jukebox:
+                - at: 0:00:00
+                  random:
+                          - traveling_lights
+                          - secret things
+                  repeat: 10
+
+
+
+
+

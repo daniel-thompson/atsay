@@ -1,0 +1,82 @@
+#
+# doubleendbag.yaml
+#
+# Quick double-end bag workout. It is intended to pair with a fairly long
+# callisthenics warm up.
+#
+
+meta:
+        length: 00:16:30
+
+        include:
+                - time.yaml
+                - jukebox.yaml
+
+macros:
+        jab:
+                - say: Round {round}. Single and double jabs.
+                - say: Keep working your feet and get the distance right.
+                - macro: two minutes
+                - say: Have a quick rest but be sure to keep moving.
+
+        cross:
+                - say: Round {round}. Jab, cross.
+                - say: Focus on technique, especially the back foot on the cross.
+                - macro: two minutes
+                - say: Have a quick rest but be sure to keep moving.
+
+        hook:
+                - say: Round {round}. Try some hook shots.
+                - say: Turn your hand over and get the timing right.
+                - macro: two minutes
+                - say: Have a quick rest but be sure to keep moving.
+
+        jab cross:
+                - say: Round {round}. Continuous jab, cross, jab, cross.
+                - say: Keep a moderate pace.
+                - macro: two minutes
+                - say: Have a quick rest but be sure to keep moving.
+
+        fast jab cross:
+                - say: Round {round}. Continuous jab, cross, jab, cross.
+                - say: Go as fast as the bag will let you.
+                - macro: two minutes
+                - say: Have a quick rest but be sure to keep moving.
+
+        freestyle:
+                - say: Round {round}.
+                - say: Throw whatever you like at the bag!
+                - macro: two minutes
+                - say: Have a quick rest but be sure to keep moving.
+
+        kicks:
+                - say: Round {round}.
+                - say: Throw some kicks at the bag. Try to work each leg equally.
+                - macro: two minutes
+                - say: Have a quick rest but be sure to keep moving.
+
+
+timetable:
+        - at: 0:00:00
+          macro: jukebox
+
+        - at: 0:00:00
+          macro: jab
+
+        - at: 0:02:30
+          macro: cross
+
+        - at: 0:05:00
+          macro: jab cross
+
+        - at: 0:07:30
+          macro: freestyle
+        
+        - at: 0:10:00
+          macro: fast jab cross
+        
+        - at: 0:12:30
+          macro: freestyle
+        
+        - say: That's all for today.
+        - say: Be sure to stretch out properly.
