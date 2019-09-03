@@ -31,6 +31,7 @@ class AudioTimetable:
 	def __init__(self, fname):
 		self._fname = Path(fname)
 		self._cachedir = self._fname.parent / 'atsay-cache'
+		self._speech_cache = {}
 
 		self.dry_run = False
 		self.fast = False
@@ -337,14 +338,19 @@ class AudioTimetable:
 			return AudioSegment.silent(
 					duration=1900,
 					frame_rate=44100).set_channels(2)
-		if not self._cachedir.exists():
-			os.mkdir(self._cachedir)
 
-		cacheline = self._cachedir / f'{say}-{lang}.mp3'
-		if not cacheline.exists():
-			TTS(say, lang=lang).save(cacheline)
+		if say not in self._speech_cache:
+			if not self._cachedir.exists():
+				os.mkdir(self._cachedir)
 
-		return AudioSegment.from_mp3(str(cacheline))
+			cachefile = self._cachedir / f'{say}-{lang}.mp3'
+			if not cachefile.exists():
+				TTS(say, lang=lang).save(cachefile)
+
+			self._speech_cache[say] = AudioSegment.from_mp3(
+					str(cachefile))
+
+		return self._speech_cache[say]
 
 def main():
 	parser = argparse.ArgumentParser()
