@@ -35,10 +35,11 @@ class AudioTimetable:
 		self.fast = False
 		self.dry_run = False
 
-	def export(self, *args, **kwargs):
+	def export(self, out_f, *args, **kwargs):
 		self._parse()
+		print(f'>>>            WRITING {out_f}')
 		if not self.dry_run:
-			self._track.export(*args, **kwargs)
+			self._track.export(out_f, *args, **kwargs)
 
 	@staticmethod
 	def _as_time(t):
@@ -341,21 +342,31 @@ class AudioTimetable:
 
 def main():
 	parser = argparse.ArgumentParser()
-	parser.add_argument('infile')
+	parser.add_argument('infile',
+			help='input filename')
 	parser.add_argument('--dry-run', action='store_true',
 			help='fast syntax check')
 	parser.add_argument('--fast', action='store_true',
 			help='enable fast-mode (a.k.a. disable soft-muting)')
+	parser.add_argument('-o', '--output', dest='outfile',
+			help='output filename')
 	args = parser.parse_args()
 
 	infile = Path(args.infile)
 	outfile = infile.parent / (infile.stem + '.wav')
+	if args.outfile:
+		outfile = Path(args.outfile)
+	fmt = outfile.suffix.lstrip('.')
+
+	tags = {
+		'artist': 'Audio Timetable',
+	}
 
 	atsay = AudioTimetable(infile)
 	atsay.dry_run = args.dry_run
 	atsay.fast = args.fast
 
 	random.seed()
-	atsay.export(outfile, format='wav')
+	atsay.export(outfile, format=fmt, tags=tags)
 
 main()
