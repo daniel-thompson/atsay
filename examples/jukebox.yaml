@@ -18,7 +18,7 @@ macros:
                 - at: 0:00:00
                   random:
                           - traveling_lights
-                          - secret things
+                          - secret_things
                   repeat: 10
 
 
