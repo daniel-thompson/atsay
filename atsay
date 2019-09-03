@@ -32,8 +32,9 @@ class AudioTimetable:
 		self._fname = Path(fname)
 		self._cachedir = self._fname.parent / 'atsay-cache'
 
-		self.fast = False
 		self.dry_run = False
+		self.fast = False
+		self.include_path = [ self._fname.parent, Path('.') ]
 
 	def export(self, out_f, *args, **kwargs):
 		self._parse()
@@ -221,12 +222,17 @@ class AudioTimetable:
 
 		self._pause = 0
 
-	def _include(self, fname):
+	def _include(self, include_fname):
 		'''Parses meta/include, meta/lang, meta/translate and macros'''
-		if fname:
+		if include_fname:
+			for p in self.include_path:
+				fname = p / include_fname
+				if fname.exists():
+					break
 			print(f'>>>            INCLUDING {fname}')
-			with open(str(self._fname.parent / fname)) as f:
+			with open(fname) as f:
 				y = yaml.safe_load(f)
+
 		else:
 			y = self._raw
 
@@ -350,6 +356,8 @@ def main():
 			help='enable fast-mode (a.k.a. disable soft-muting)')
 	parser.add_argument('-o', '--output', dest='outfile',
 			help='output filename')
+	parser.add_argument('-I', '--include', action='append', default=[],
+			help='extend the search path')
 	args = parser.parse_args()
 
 	infile = Path(args.infile)
@@ -365,6 +373,7 @@ def main():
 	atsay = AudioTimetable(infile)
 	atsay.dry_run = args.dry_run
 	atsay.fast = args.fast
+	atsay.include_path = [ Path(p) for p in args.include ] + atsay.include_path
 
 	random.seed()
 	atsay.export(outfile, format=fmt, tags=tags)
