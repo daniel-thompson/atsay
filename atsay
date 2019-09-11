@@ -225,6 +225,10 @@ class AudioTimetable:
 
 	def _include(self, include_fname):
 		'''Parses meta/include, meta/lang, meta/translate and macros'''
+		if include_fname in self._included:
+			return
+		else:
+			self._included.append(include_fname)
 		if include_fname:
 			for p in self.include_path:
 				fname = p / include_fname
