@@ -31,6 +31,12 @@ macros:
                 - at: 0:00:20
                   macro: ten seconds
 
+        forty five seconds:
+                - at: 0:00:15
+                  say: Thirty seconds!
+                - at: 0:00:15
+                  macro: thirty seconds
+
         one minute:
                 - at: 0:00:00
                   say: Only one minute left.
