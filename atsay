@@ -15,7 +15,7 @@ import os
 
 from gtts import gTTS as TTS
 from pathlib import Path
-from pydub import AudioSegment
+from pydub import (AudioSegment, AudioBuffer)
 
 # It it's installed we'd rather use IPython for interaction...
 try:
@@ -32,6 +32,7 @@ class AudioTimetable:
 		self._fname = Path(fname)
 		self._cachedir = self._fname.parent / 'atsay-cache'
 		self._speech_cache = {}
+		self._included = []
 
 		self.dry_run = False
 		self.fast = False
@@ -41,7 +42,7 @@ class AudioTimetable:
 		self._parse()
 		print(f'>>>            WRITING {out_f}')
 		if not self.dry_run:
-			self._track.export(out_f, *args, **kwargs)
+			self._track.segment().export(out_f, *args, **kwargs)
 
 	@staticmethod
 	def _as_time(t):
@@ -59,29 +60,20 @@ class AudioTimetable:
 		if self.dry_run:
 			return segment
 
-		middle_start = position
-		middle_end = position + len(segment)
-		duration = 500
-
-		beginning = self._track[:middle_start]
-		middle = self._track[middle_start:middle_end]
-		end = self._track[middle_end:]
-
-		middle = middle.overlay(
+		self._track.overlay(
 				segment,
-				position=0,
+				position=position,
 				gain_during_overlay=gain_during_overlay)
-		if not self.fast:
-			beginning = beginning.fade(
-					to_gain=gain_during_overlay,
-					duration=duration,
-					end=float('inf'))
-			end = end.fade(
-					from_gain=gain_during_overlay,
-					duration=duration,
-					start=0)
 
-		return beginning + middle + end
+		if not self.fast:
+			self._track.fade(
+					to_gain=gain_during_overlay,
+					end=position,
+					duration=500)
+			self._track.fade(
+					from_gain=gain_during_overlay,
+					start=position+segment.frame_count(),
+					duration=500)
 
 	def _say(self, say, lang):
 		# Handle {template} substitutions. Substitutions occur
@@ -115,7 +107,7 @@ class AudioTimetable:
 		say = say.rstrip('.')
 
 		speech = self._text_to_speech(say, lang)
-		self._track = self._overlay(
+		self._overlay(
 				speech,
 				position=self._at,
 				gain_during_overlay=-12)
@@ -133,14 +125,13 @@ class AudioTimetable:
 			play = self._fname.parent / play
 
 		audio = AudioSegment.from_file(play)
-		self._track = self._overlay(
-				audio,
-				position=self._at,
-				gain_during_overlay=-12)
+		self._overlay(audio,
+			      position=self._at,
+			      gain_during_overlay=-12)
 		self._at += len(audio)
 
 		if self._at > len(self._track):
-			self._track = self._track.fade_out(duration=5000)
+			self._track.fade_out(duration=5000)
 
 	def _random(self, t):
 		least_visited = max(self._counts.values())
@@ -257,6 +248,8 @@ class AudioTimetable:
 
 		def add_inherited_tags(t):
 			if 'say' in t and 'lang' not in t:
+				# TODO: Syntax errors in macros (no list after
+				#       label) cause this assignment to fail.
 				t['lang'] = lang
 			if 'translate' in t and 'to' not in t:
 				t['to'] = translate
@@ -329,9 +322,10 @@ class AudioTimetable:
 		self._at = 0
 
 		# Create a silent stereo track of the right duration
-		self._track = AudioSegment.silent(
+		segment = AudioSegment.silent(
 				duration=self._meta['length'],
 				frame_rate=44100).set_channels(2)
+		self._track = AudioBuffer(segment)
 
 		self._render(self._timetable)
 
@@ -360,14 +354,16 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('infile',
 			help='input filename')
+	parser.add_argument('-D', '--define', action='append', default=[],
+			help='add meta-data from the command line')
 	parser.add_argument('--dry-run', action='store_true',
 			help='fast syntax check')
 	parser.add_argument('--fast', action='store_true',
 			help='enable fast-mode (a.k.a. disable soft-muting)')
-	parser.add_argument('-o', '--output', dest='outfile',
-			help='output filename')
 	parser.add_argument('-I', '--include', action='append', default=[],
 			help='extend the search path')
+	parser.add_argument('-o', '--output', dest='outfile',
+			help='output filename')
 	args = parser.parse_args()
 
 	infile = Path(args.infile)
@@ -384,6 +380,12 @@ def main():
 	atsay.dry_run = args.dry_run
 	atsay.fast = args.fast
 	atsay.include_path = [ Path(p) for p in args.include ] + atsay.include_path
+	def pair(s):
+		l = s.split('=', 1)
+		if len(l) == 1:
+			l.append(None)
+		return l
+	atsay.defines = { k: v for k, v in [ pair(s) for s in args.define ] }
 
 	random.seed()
 	atsay.export(outfile, format=fmt, tags=tags)
