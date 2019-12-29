@@ -32,6 +32,7 @@ class AudioTimetable:
 		self._fname = Path(fname)
 		self._cachedir = self._fname.parent / 'atsay-cache'
 		self._speech_cache = {}
+		self._included = []
 
 		self.dry_run = False
 		self.fast = False
@@ -257,6 +258,8 @@ class AudioTimetable:
 
 		def add_inherited_tags(t):
 			if 'say' in t and 'lang' not in t:
+				# TODO: Syntax errors in macros (no list after
+				#       label) cause this assignment to fail.
 				t['lang'] = lang
 			if 'translate' in t and 'to' not in t:
 				t['to'] = translate
@@ -360,14 +363,16 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument('infile',
 			help='input filename')
+	parser.add_argument('-D', '--define', action='append', default=[],
+			help='add meta-data from the command line')
 	parser.add_argument('--dry-run', action='store_true',
 			help='fast syntax check')
 	parser.add_argument('--fast', action='store_true',
 			help='enable fast-mode (a.k.a. disable soft-muting)')
-	parser.add_argument('-o', '--output', dest='outfile',
-			help='output filename')
 	parser.add_argument('-I', '--include', action='append', default=[],
 			help='extend the search path')
+	parser.add_argument('-o', '--output', dest='outfile',
+			help='output filename')
 	args = parser.parse_args()
 
 	infile = Path(args.infile)
@@ -384,6 +389,12 @@ def main():
 	atsay.dry_run = args.dry_run
 	atsay.fast = args.fast
 	atsay.include_path = [ Path(p) for p in args.include ] + atsay.include_path
+	def pair(s):
+		l = s.split('=', 1)
+		if len(l) == 1:
+			l.append(None)
+		return l
+	atsay.defines = { k: v for k, v in [ pair(s) for s in args.define ] }
 
 	random.seed()
 	atsay.export(outfile, format=fmt, tags=tags)
