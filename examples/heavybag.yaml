@@ -85,6 +85,12 @@ macros:
                 - macro: one minute
                 - say: Have a quick rest but be sure to keep moving.
 
+        hooks:
+                - say: Round {round}. Work your hook punches.
+                - say: Practice both individual mechanics and simple combos.
+                - macro: two minutes thirty
+                - say: Have a quick rest but be sure to keep moving.
+
         five shots:
                 - say: Round {round}. Five shots at a time. Work jab, cross and hook punches.
                 - macro: two minutes thirty
@@ -157,10 +163,13 @@ timetable:
 
         - random:                       #  8:00
                 - cross
+                - hooks
                 - five shots
           length: 0:03:00
 
-        - macro: jab cross              # 11:00
+        - random:                       # 11:00
+                - five shots
+                - jab cross
           length: 0:03:00
 
         - macro: freestyle              # 14:00
