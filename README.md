@@ -13,7 +13,12 @@ Installation
 ------------
 
 atsay is written in python (>= 3.6) and depends on some additional modules, all
-of which can be found in pypi and installed using pip3: gTTS, pydub, yaml. 
+of which can be found in pypi and installed using pip3: gTTS, numpy, pydub,
+yaml: 
+
+~~~
+apt install python3 python3-gtts python3-numpy python3-pydub python3-yaml
+~~~
 
 License
 -------
