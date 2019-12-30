@@ -13,6 +13,25 @@ meta:
                 - jukebox.yaml
 
 macros:
+        press ups:
+                - say: Press ups!
+        burpees:
+                - say: Burpees.
+        squats:
+                - say: Squats.
+        sit ups:
+                - say: Sit ups. Keep your back straight.
+        alternating lunges:
+                - say: Alternating lunges.
+
+        exercises:
+                - random:
+                        - press ups
+                        - burpees
+                        - squats
+                        - sit ups
+                        - alternating lunges
+
         # Simple five minute warm up
         warm up:
                 - say: Time to warm up.
@@ -23,23 +42,23 @@ macros:
 
                 - say: Finish the warm up with a few exercises.
 
-                - say: Press ups!
+                - macro: exercises
                 - at: 0:02:00
                 - macro: thirty seconds
 
-                - say: Burpees
+                - macro: exercises
                 - at: 0:02:30
                 - macro: thirty seconds
 
-                - say: Squats
+                - macro: exercises
                 - at: 0:03:00
                 - macro: thirty seconds
 
-                - say: Sit ups. Keep your back straight.
+                - macro: exercises
                 - at: 0:03:30
                 - macro: thirty seconds
 
-                - say: Alternating lunges
+                - macro: exercises
                 - at: 0:04:00
                 - macro: thirty seconds
                 - say: Have a quick rest but be sure to keep moving.
